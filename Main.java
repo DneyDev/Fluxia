@@ -1,23 +1,12 @@
 import java.util.Scanner;
 
-public class Main { //nome IGUAL o do ARQUIVO
+public class Main { 
     public static void main(String[] args) {
-        
-        Scanner leitor = new Scanner(System.in);
+       
+        Scanner leitorNome = new Scanner(System.in);
 
-        String name= "";
-        do{
-            System.out.println("Informe um nome: ");
-            name = leitor.next();
-            
-
-        }while(!name.equalsIgnoreCase("sair"));
-
-        if(name.equalsIgnoreCase("sair")){  
-                leitor.close(); /*dentro do if porém fora do loop DO
-                para não virar uma Exception e findar por manter o
-                loop, caso contrário iria anular o loop
-                */
-            }
+        String userName = leitorNome.nextLine();
+        System.out.print("Hello, " + userName);
+        leitorNome.close();
     }
 }
