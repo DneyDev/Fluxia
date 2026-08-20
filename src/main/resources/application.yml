@@ -1,6 +1,8 @@
 spring:
   application:
     name: fluxia
+  #profiles:
+  #   active: ai   # descomentar quando tiver a OPENAI_API_KEY configurada
   datasource:
     url: jdbc:h2:mem:fluxiadb
     driver-class-name: org.h2.Driver
