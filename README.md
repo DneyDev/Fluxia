@@ -1,8 +1,8 @@
-# Fluxia 💰🎙️
+# Fluxia 
 
 API inteligente de orçamento que processa **comandos de voz e texto** relacionados a transações financeiras, construída com **Spring Boot** e **Spring AI**.
 
-Projeto desenvolvido como desafio prático de Spring AI (trilha DIO), evoluído do zero em etapas públicas de commit, com foco em entender como conectar IA a uma aplicação real respeitando responsabilidades e organização de código.
+Projeto desenvolvido como desafio prático de Spring AI (trilha Santander & DIO), evoluído do zero em etapas públicas de commit, com foco em entender como conectar IA a uma aplicação real respeitando responsabilidades e organização de código.
 
 ---
 
