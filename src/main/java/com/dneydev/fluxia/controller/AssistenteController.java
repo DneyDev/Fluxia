@@ -24,4 +24,9 @@ public class AssistenteController {
     public String processarAudio(@RequestParam("arquivo") MultipartFile arquivo) {
         return assistenteService.processarAudio(arquivo);
     }
+    @PostMapping(value = "/audio/resposta-em-voz", consumes = "multipart/form-data",
+                 produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public byte[] processarAudioComVoz(@RequestParam("arquivo") MultipartFile arquivo) {
+        return assistenteService.processarAudioComRespostaEmVoz(arquivo);
+    }
 }

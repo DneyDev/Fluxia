@@ -4,6 +4,7 @@ import com.dneydev.fluxia.dto.ComandoInterpretado;
 import com.dneydev.fluxia.dto.TransacaoRequest;
 import com.dneydev.fluxia.dto.TransacaoResponse;
 import com.dneydev.fluxia.service.ia.AssistenteIA;
+import com.dneydev.fluxia.service.ia.GeradorVoz;
 import com.dneydev.fluxia.service.ia.TranscritorAudio;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ public class AssistenteService {
 
     private final AssistenteIA assistenteIA;
     private final TranscritorAudio transcritorAudio;
+    private final GeradorVoz geradorVoz;
     private final TransacaoService transacaoService;
 
     public String processarComando(String textoComando) {
@@ -27,6 +29,11 @@ public class AssistenteService {
     public String processarAudio(MultipartFile arquivoAudio) {
         String textoTranscrito = transcritorAudio.transcrever(arquivoAudio);
         return interpretarEExecutar(textoTranscrito);
+    }
+
+    public byte[] processarAudioComRespostaEmVoz(MultipartFile arquivoAudio) {
+        String respostaTexto = processarAudio(arquivoAudio);
+        return geradorVoz.gerarAudio(respostaTexto);
     }
 
     private String interpretarEExecutar(String textoComando) {
