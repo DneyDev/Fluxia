@@ -119,7 +119,7 @@ Além do fluxo pedido no desafio, a principal evolução foi arquitetural: em ve
 ---
 
 ## Status do desenvolvimento
-> Projeto em construção.
+> Projeto Concluído.
 
 - [x] Setup inicial do projeto
 - [x] Modelagem do domínio
@@ -131,11 +131,3 @@ Além do fluxo pedido no desafio, a principal evolução foi arquitetural: em ve
 - [x] Geração de voz
 - [x] Testes
 - [x] Documentação final
-- [ ] Modelagem do domínio
-- [ ] Persistência
-- [ ] Endpoints REST (CRUD)
-- [ ] Integração com IA (Spring AI)
-- [ ] Transcrição de áudio
-- [ ] Tool Calling
-- [ ] Geração de voz
-- [ ] Testes
