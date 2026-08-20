@@ -20,4 +20,8 @@ public class AssistenteController {
     public String processarComando(@Valid @RequestBody ComandoRequest request) {
         return assistenteService.processarComando(request.comando());
     }
+    @PostMapping(value = "/audio", consumes = "multipart/form-data")
+    public String processarAudio(@RequestParam("arquivo") MultipartFile arquivo) {
+        return assistenteService.processarAudio(arquivo);
+    }
 }

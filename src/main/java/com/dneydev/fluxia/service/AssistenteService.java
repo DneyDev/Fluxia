@@ -1,12 +1,13 @@
 package com.dneydev.fluxia.service;
 
-import com.dneydev.fluxia.domain.TipoTransacao;
 import com.dneydev.fluxia.dto.ComandoInterpretado;
 import com.dneydev.fluxia.dto.TransacaoRequest;
 import com.dneydev.fluxia.dto.TransacaoResponse;
 import com.dneydev.fluxia.service.ia.AssistenteIA;
+import com.dneydev.fluxia.service.ia.TranscritorAudio;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -16,9 +17,19 @@ import java.time.LocalDate;
 public class AssistenteService {
 
     private final AssistenteIA assistenteIA;
+    private final TranscritorAudio transcritorAudio;
     private final TransacaoService transacaoService;
 
     public String processarComando(String textoComando) {
+        return interpretarEExecutar(textoComando);
+    }
+
+    public String processarAudio(MultipartFile arquivoAudio) {
+        String textoTranscrito = transcritorAudio.transcrever(arquivoAudio);
+        return interpretarEExecutar(textoTranscrito);
+    }
+
+    private String interpretarEExecutar(String textoComando) {
         ComandoInterpretado comando = assistenteIA.interpretarComando(textoComando);
 
         return switch (comando.acao()) {
