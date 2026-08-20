@@ -13,7 +13,7 @@ API inteligente de orçamento que processa comandos de voz relacionados a transa
 - [x] Transcrição de áudio
 - [x] Tool Calling — implementado e documentado (stub ativo + implementação real como referência)
 - [x] Geração de voz — base + stub + referência real
-- [ ] Testes
+- [x] Testes — TransacaoService, AssistenteIAStub, AssistenteService
 - [ ] Documentação final
 
 ## Sobre a integração com IA
