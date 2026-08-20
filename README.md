@@ -2,7 +2,7 @@
 
 API inteligente de orçamento que processa comandos de voz relacionados a transações financeiras, usando Spring Boot + Spring AI.
 
-> 🚧 Projeto em construção — desenvolvido em etapas públicas no GitHub.
+> Projeto em construção.
 
 ## Status
 - [x] Setup inicial do projeto
