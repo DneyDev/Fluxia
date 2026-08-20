@@ -8,8 +8,8 @@ API inteligente de orçamento que processa comandos de voz relacionados a transa
 - [x] Setup inicial do projeto
 - [x] Modelagem do domínio
 - [x] Persistência
-- [ ] Endpoints REST (CRUD)
-- [ ] Integração com IA (Spring AI)
+- [x] Endpoints REST (CRUD)
+- [x] Integração com IA (Spring AI) — base + stub
 - [ ] Transcrição de áudio
 - [ ] Tool Calling
 - [ ] Geração de voz
