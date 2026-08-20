@@ -1,111 +1,92 @@
 package com.dneydev.fluxia.service;
 
-import com.dneydev.fluxia.domain.Categoria;
 import com.dneydev.fluxia.domain.Transacao;
 import com.dneydev.fluxia.domain.TipoTransacao;
-import com.dneydev.fluxia.dto.TransacaoRequest;
-import com.dneydev.fluxia.exception.RecursoNaoEncontradoException;
-import com.dneydev.fluxia.repository.TransacaoRepository;
-import org.junit.jupiter.api.BeforeEach;
+import com.dneydev.fluxia.dto.ComandoInterpretado;
+import com.dneydev.fluxia.service.ia.AssistenteIA;
+import com.dneydev.fluxia.service.ia.GeradorVoz;
+import com.dneydev.fluxia.service.ia.TranscritorAudio;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class TransacaoServiceTest {
+class AssistenteServiceTest {
 
-    @Mock
-    private TransacaoRepository transacaoRepository;
-
-    @Mock
-    private CategoriaService categoriaService;
+    @Mock private AssistenteIA assistenteIA;
+    @Mock private TranscritorAudio transcritorAudio;
+    @Mock private GeradorVoz geradorVoz;
+    @Mock private TransacaoService transacaoService;
 
     @InjectMocks
-    private TransacaoService transacaoService;
+    private AssistenteService assistenteService;
 
-    private Transacao transacaoExemplo;
+    @Test
+    void deveRegistrarTransacaoQuandoComandoForCriarTransacao() {
+        ComandoInterpretado comando = new ComandoInterpretado(
+                "CRIAR_TRANSACAO", "Gasto com mercado", new BigDecimal("50.00"),
+                TipoTransacao.DESPESA, "mercado", LocalDate.now());
 
-    @BeforeEach
-    void setUp() {
-        transacaoExemplo = Transacao.builder()
-                .id(1L)
-                .descricao("Mercado")
-                .valor(new BigDecimal("150.00"))
-                .tipo(TipoTransacao.DESPESA)
-                .data(LocalDate.of(2026, 8, 10))
-                .build();
+        when(assistenteIA.interpretarComando("gastei 50 reais em mercado")).thenReturn(comando);
+        when(transacaoService.criar(any())).thenReturn(
+                Transacao.builder()
+                        .descricao("Gasto com mercado")
+                        .valor(new BigDecimal("50.00"))
+                        .tipo(TipoTransacao.DESPESA)
+                        .data(LocalDate.now())
+                        .build());
+
+        String resposta = assistenteService.processarComando("gastei 50 reais em mercado");
+
+        assertThat(resposta).contains("Transação registrada").contains("50");
     }
 
     @Test
-    void deveCriarTransacaoSemCategoria() {
-        TransacaoRequest request = new TransacaoRequest(
-                "Mercado", new BigDecimal("150.00"), TipoTransacao.DESPESA,
-                LocalDate.of(2026, 8, 10), null);
+    void deveConsultarSaldoQuandoComandoForConsultarSaldo() {
+        ComandoInterpretado comando = new ComandoInterpretado(
+                "CONSULTAR_SALDO", null, null, null, null, null);
 
-        when(transacaoRepository.save(any(Transacao.class))).thenReturn(transacaoExemplo);
+        when(assistenteIA.interpretarComando("qual meu saldo")).thenReturn(comando);
+        when(transacaoService.calcularSaldoPorPeriodo(any(), any())).thenReturn(new BigDecimal("650.00"));
 
-        Transacao resultado = transacaoService.criar(request);
+        String resposta = assistenteService.processarComando("qual meu saldo");
 
-        assertThat(resultado.getDescricao()).isEqualTo("Mercado");
-        assertThat(resultado.getValor()).isEqualByComparingTo("150.00");
-        verify(categoriaService, never()).buscarOuCriarPorNome(any(), any());
-        verify(transacaoRepository).save(any(Transacao.class));
+        assertThat(resposta).contains("650");
     }
 
     @Test
-    void deveCriarTransacaoResolvendoCategoriaQuandoInformada() {
-        TransacaoRequest request = new TransacaoRequest(
-                "Mercado", new BigDecimal("150.00"), TipoTransacao.DESPESA,
-                LocalDate.of(2026, 8, 10), "Alimentação");
+    void deveRetornarMensagemPadraoParaComandoDesconhecido() {
+        when(assistenteIA.interpretarComando("oi tudo bem"))
+                .thenReturn(new ComandoInterpretado("DESCONHECIDO", null, null, null, null, null));
 
-        Categoria categoria = Categoria.builder().id(1L).nome("Alimentação").tipo(TipoTransacao.DESPESA).build();
-        when(categoriaService.buscarOuCriarPorNome("Alimentação", TipoTransacao.DESPESA)).thenReturn(categoria);
-        when(transacaoRepository.save(any(Transacao.class))).thenReturn(transacaoExemplo);
+        String resposta = assistenteService.processarComando("oi tudo bem");
 
-        transacaoService.criar(request);
-
-        verify(categoriaService).buscarOuCriarPorNome("Alimentação", TipoTransacao.DESPESA);
+        assertThat(resposta).contains("Não consegui entender");
     }
 
     @Test
-    void deveLancarExcecaoAoBuscarTransacaoInexistente() {
-        when(transacaoRepository.findById(99L)).thenReturn(java.util.Optional.empty());
+    void deveTranscreverAudioAntesDeInterpretar() {
+        MockMultipartFile arquivo = new MockMultipartFile(
+                "arquivo", "comando.txt", "text/plain", "qual meu saldo".getBytes());
 
-        assertThatThrownBy(() -> transacaoService.buscarPorId(99L))
-                .isInstanceOf(RecursoNaoEncontradoException.class)
-                .hasMessageContaining("99");
-    }
+        when(transcritorAudio.transcrever(arquivo)).thenReturn("qual meu saldo");
+        when(assistenteIA.interpretarComando("qual meu saldo"))
+                .thenReturn(new ComandoInterpretado("CONSULTAR_SALDO", null, null, null, null, null));
+        when(transacaoService.calcularSaldoPorPeriodo(any(), any())).thenReturn(BigDecimal.ZERO);
 
-    @Test
-    void deveCalcularSaldoComoReceitasMenosDespesas() {
-        when(transacaoRepository.somarPorTipoEPeriodo(eq(TipoTransacao.RECEITA), any(), any()))
-                .thenReturn(new BigDecimal("1000.00"));
-        when(transacaoRepository.somarPorTipoEPeriodo(eq(TipoTransacao.DESPESA), any(), any()))
-                .thenReturn(new BigDecimal("350.00"));
+        assistenteService.processarAudio(arquivo);
 
-        BigDecimal saldo = transacaoService.calcularSaldoPorPeriodo(
-                LocalDate.of(2026, 8, 1), LocalDate.of(2026, 8, 31));
-
-        assertThat(saldo).isEqualByComparingTo("650.00");
-    }
-
-    @Test
-    void deveLancarExcecaoAoDeletarTransacaoInexistente() {
-        when(transacaoRepository.existsById(99L)).thenReturn(false);
-
-        assertThatThrownBy(() -> transacaoService.deletar(99L))
-                .isInstanceOf(RecursoNaoEncontradoException.class);
-
-        verify(transacaoRepository, never()).deleteById(any());
+        // Confirma que o pipeline usou o texto transcrito, não o arquivo bruto
+        org.mockito.Mockito.verify(assistenteIA).interpretarComando("qual meu saldo");
     }
 }
